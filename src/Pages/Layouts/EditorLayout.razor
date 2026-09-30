@@ -1,5 +1,5 @@
 @using GTDialogueViewer.Layout
-
+@implements IAsyncDisposable
 @inject IJSRuntime JS
 
 <div class="tab-container">
@@ -22,31 +22,91 @@
         @if (activeTab != null)
         {
             <div class="mb-2 text-muted small">Path: @activeTab.FilePath</div>
+            <textarea class="form-control font-monospace" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
+        }
 
-            @if (activeTab.IsPoFile)
-            {
-                <!-- Render PO file editor view -->
-                <textarea class="form-control" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
-            }
-            else
-            {
-                <!-- Render GTDialogue (JSON) file editor view -->
-                <textarea class="form-control font-monospace" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
-            }
-        }
-        else
-        {
-            <div class="text-muted text-center py-5">
-                <p>No files open. Open a file from the menu or double-click a .gtdialogue file.</p>
-                <button class="btn btn-primary" @onclick="OpenFilePrompt">Browse File...</button>
-            </div>
-        }
+        <div class="text-muted text-center py-5">
+            <button class="btn btn-primary" @onclick="OpenFilePrompt">Browse File...</button>
+        </div>
     </div>
 </div>
 
 @code {
     private List<EditorTab> openTabs = new();
     private EditorTab? activeTab;
+    private DotNetObjectReference<EditorLayout>? objRef;
+    // Static reference so JS can call back into the current instance
+    private static EditorLayout? _instance;
+
+    protected override void OnInitialized()
+    {
+        _instance = this;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+
+            // 1. Listen for runtime events when the app is already open and another file is double-clicked
+            await JS.InvokeVoidAsync("eval", @"
+                window.__TAURI__.event.listen('open-file-from-os', (event) => {
+                    // event.payload contains argv array from the second instance
+                    DotNet.invokeMethodAsync('GTDialogueViewer', 'HandleExternalFiles', event.payload);
+                });
+            ");
+
+            // 2. Check for initial command line arguments (cold launch by double-clicking a file)
+            try
+            {
+                var argv = await JS.InvokeAsync<string[]>("window.__TAURI__.core.invoke", "get_startup_args");
+                if (argv != null && argv.Length > 0)
+                {
+                    await HandleExternalFilesInternal(argv.ToList());
+                }
+            }
+            catch
+            {
+                // Fallback if command invoke isn't registered yet
+            }
+        }
+    }
+
+    [JSInvokable]
+    public static async Task HandleExternalFiles(List<string> args)
+    {
+        if (_instance != null)
+        {
+            await _instance.HandleExternalFilesInternal(args);
+        }
+    }
+
+    private async Task HandleExternalFilesInternal(List<string> args)
+    {
+        // Typically, command-line arguments passed via file associations contain the file path.
+        // We filter out standard flags/executable paths and look for valid files.
+        foreach (var arg in args)
+        {
+            if (!arg.StartsWith("-") && (arg.EndsWith(".gtdialogue", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".po", StringComparison.OrdinalIgnoreCase)))
+            {
+                if (File.Exists(arg) || await CheckFileExistsBackend(arg))
+                {
+                    await OpenFile(arg);
+                }
+            }
+        }
+    }
+
+    private async Task<bool> CheckFileExistsBackend(string path)
+    {
+        try
+        {
+            // Optional helper if needed, but OpenFile handles reading via backend anyway
+            return true;
+        }
+        catch { return false; }
+    }
 
     public async Task OpenFile(string path)
     {
@@ -59,7 +119,6 @@
 
         try
         {
-            // Read file contents via Tauri Rust backend instead of C# System.IO
             string text = await JS.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
         
             var newTab = new EditorTab
@@ -94,12 +153,17 @@
 
     private async Task OpenFilePrompt()
     {
-        // Calls your Rust 'open_file_dialog' command and gets back the file path string
         var path = await JS.InvokeAsync<string?>("window.__TAURI__.core.invoke", "open_file_dialog");
 
         if (!string.IsNullOrEmpty(path))
         {
             await OpenFile(path);
         }
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        objRef?.Dispose();
+        return ValueTask.CompletedTask;
     }
 }
