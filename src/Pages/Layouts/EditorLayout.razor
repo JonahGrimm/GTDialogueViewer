@@ -3,16 +3,18 @@
 @inject IJSRuntime JS
 
 <div class="tab-container">
-    <!-- Tab Headers Bar -->
-    <ul class="nav nav-tabs">
+    <!-- Tab Headers Bar (Horizontal & Sortable) -->
+    <ul class="nav-tabs-bar" @ref="tabsContainerRef">
         @foreach (var tab in openTabs)
         {
-            <li class="nav-item">
-                <button class="nav-link @(activeTab == tab ? "active" : "")" @onclick="() => SwitchTab(tab)">
+            <li class="browser-tab @(activeTab == tab ? "active" : "")" 
+                    @key="tab.Id" 
+                    @onclick="() => SwitchTab(tab)">
+                <span class="tab-title">
                     @tab.FileName
-                    @if (tab.IsModified) { <span class="text-danger"> *</span> }
-                    <span class="ms-2 text-muted" @onclick="() => CloseTab(tab)" @onclick:stopPropagation="true">&times;</span>
-                </button>
+                    @if (tab.IsModified) { <span class="text-danger">*</span> }
+                </span>
+                <button class="tab-close-btn" @onclick="() => CloseTab(tab)" @onclick:stopPropagation="true">&times;</button>
             </li>
         }
     </ul>
@@ -31,7 +33,87 @@
     </div>
 </div>
 
+<style>
+    /* Browser-style horizontal tabs layout */
+    .browser-tab-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nav-tabs-bar {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        background-color: #f1f3f5;
+        border-bottom: 1px solid #dee2e6;
+        overflow-x: auto;
+        white-space: nowrap;
+        gap: 2px;
+    }
+
+    .browser-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        background-color: #e9ecef;
+        border: 1px solid transparent;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+        font-size: 14px;
+        max-width: 200px;
+        transition: background-color 0.1s ease;
+    }
+
+    .browser-tab:hover {
+        background-color: #dee2e6;
+    }
+
+    .browser-tab.active {
+        background-color: #ffffff;
+        border-color: #dee2e6 #dee2e6 #ffffff #dee2e6;
+        border-bottom: 2px solid #ffffff;
+        font-weight: 500;
+    }
+
+    .tab-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-right: 8px;
+    }
+
+    .tab-close-btn {
+        background: transparent;
+        border: none;
+        font-size: 16px;
+        line-height: 1;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0 2px;
+        border-radius: 4px;
+    }
+
+    .tab-close-btn:hover {
+        background-color: rgba(0,0,0,0.1);
+        color: #000;
+    }
+
+    /* Sortable ghost element styling */
+    .sortable-ghost {
+        opacity: 0.4;
+        background-color: #ced4da !important;
+    }
+</style>
+
 @code {
+    private ElementReference tabsContainerRef;
+    private IJSObjectReference? sortableModule;
+    
     private List<EditorTab> openTabs = new();
     private EditorTab? activeTab;
     private DotNetObjectReference<EditorLayout>? objRef;
@@ -70,7 +152,31 @@
             {
                 // Fallback if command invoke isn't registered yet
             }
+            
+
         }
+        
+        // Re-initialize SortableJS on every render pass so it survives Blazor DOM updates
+        try
+        {
+            await JS.InvokeVoidAsync("window.initSortable", tabsContainerRef, objRef);
+        }
+        catch
+        {
+            // Suppress during initial prerendering if applicable
+        }
+    }
+    
+    [JSInvokable]
+    public void ReorderTabs(int oldIndex, int newIndex)
+    {
+        if (oldIndex == newIndex || oldIndex < 0 || newIndex < 0 || oldIndex >= openTabs.Count || newIndex >= openTabs.Count)
+            return;
+
+        var item = openTabs[oldIndex];
+        openTabs.RemoveAt(oldIndex);
+        openTabs.Insert(newIndex, item);
+        StateHasChanged();
     }
 
     [JSInvokable]
