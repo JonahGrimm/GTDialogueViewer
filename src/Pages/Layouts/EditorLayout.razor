@@ -2,66 +2,103 @@
 @inherits LayoutComponentBase
 @inject EditorWorkspaceService Workspace
 @inject IJSRuntime JS
-@using System.IO
 @implements IDisposable
 
-<div class="tab-container">
-    <!-- Tab Headers Bar (Horizontal & Sortable) -->
-    <SortableList class="tabs-container" OnReorder="HandleReorder">
-        @foreach (var tab in Workspace.OpenTabs)
-        {
-            <div class="tab-item @(Workspace.ActiveTab == tab ? "active" : "")" 
-                 @onclick="() => Workspace.SwitchTab(tab)">
-                <span>@tab.GetFileName()</span>
-                <button @onclick:stopPropagation="true" @onclick="() => Workspace.CloseTab(tab)">x</button>
-            </div>
-        }
-    </SortableList>
+<div class="app-window">
+    <!-- Custom Titlebar acting as the window drag zone -->
+    <div class="custom-titlebar" data-tauri-drag-region>
+        
+        <!-- Left side: Tabs + Action Buttons wrapped together -->
+        <div class="titlebar-left" data-tauri-drag-region>
+            <!-- Sortable Tabs Area -->
+            <SortableList class="tabs-container" OnReorder="HandleReorder">
+                @foreach (var tab in Workspace.OpenTabs)
+                {
+                    <div class="tab-item @(Workspace.ActiveTab == tab ? "active" : "")" 
+                         @onclick="() => Workspace.SwitchTab(tab)">
+                        <span>@tab.GetFileName()</span>
+                        <button @onclick:stopPropagation="true" @onclick="() => Workspace.CloseTab(tab)">×</button>
+                    </div>
+                }
+            </SortableList>
+            
+            <!-- Browse file button inside titlebar -->
+            <button class="action-btn" @onclick="Workspace.OpenFilePrompt">📁 Open</button>
+        </div>
 
-    <!-- Tab Content Body -->
-    <div class="tab-content border border-top-0 p-3 bg-white">
+        <!-- Right side: Window Control Buttons (Minimize, Maximize, Close) -->
+        <div class="window-controls">
+            <button class="win-btn minimize" @onclick="MinimizeWindow">&#x2013;</button>
+            <button class="win-btn maximize" @onclick="MaximizeWindow">&#x25A2;</button>
+            <button class="win-btn close" @onclick="CloseWindow">&#x2715;</button>
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="content-area">
+        @Body
         @if (Workspace.ActiveTab != null)
         {
             <textarea class="form-control font-monospace" rows="15" @bind="Workspace.ActiveTab.Content" @bind:event="oninput"></textarea>
         }
-
-        <div class="text-muted text-center py-5">
-            <button class="btn btn-primary" @onclick="Workspace.OpenFilePrompt">Browse File...</button>
-        </div>
     </div>
 </div>
 
 <style>
-    /* The tab bar container */
+    /* Layout container */
+    .app-window {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #262626;
+        overflow: hidden;
+        user-select: none;
+    }
+
+    /* Custom Titlebar spanning the top */
+    .custom-titlebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #1e1e1e;
+        height: 40px;
+        border-bottom: 1px solid #111111;
+        flex-shrink: 0;
+        width: 100%;
+    }
+
+    /* Left side container holding tabs and buttons */
+    .titlebar-left {
+        display: flex;
+        align-items: center;
+        overflow-x: auto;
+        flex-grow: 1;
+        height: 100%;
+    }
+
+    .titlebar-left::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Tabs container */
     .tabs-container {
         display: flex;
-        background-color: #1e1e1e; /* Slightly darker than tabs for contrast */
-        padding: 6px 6px 0 6px;
-        overflow-x: auto;
+        align-items: flex-end;
+        height: 100%;
         gap: 3px;
-        border-bottom: 1px solid #111111;
-        user-select: none;
-        white-space: nowrap;
+        padding-left: 6px;
     }
 
-    /* Hide scrollbar for clean look while keeping scrollability */
-    .tabs-container::-webkit-scrollbar {
-        height: 4px;
-    }
-    .tabs-container::-webkit-scrollbar-thumb {
-        background: #3a3a3a;
-        border-radius: 2px;
-    }
-
-    /* Individual tab item */
+    /* Individual browser-style tab */
     .tab-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 8px 14px;
-        background-color: #2d2d2d; /* Inactive tab color */
+        gap: 8px;
+        padding: 0 4px 0 12px;
+        height: 28px;
+        background-color: #292828;
         color: #999999;
-        font-size: 13px;
+        font-size: 12px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         border-top-left-radius: 6px;
         border-top-right-radius: 6px;
@@ -69,27 +106,25 @@
         border: 1px solid #1f1f1f;
         border-bottom: none;
         max-width: 220px;
-        min-width: 130px;
-        transition: background-color 0.15s ease, color 0.15s ease;
+        min-width: 100px;
+        transition: 0.1s ease;
     }
 
-    /* Hover state for inactive tabs */
     .tab-item:hover {
         background-color: #333333;
         color: #dddddd;
+        height: 32px;
     }
 
-    /* Active tab state */
     .tab-item.active {
-        background-color: #262626; /* Matches your specified background */
+        background-color: #3b3b3b; /* Matches app background */
         color: #ffffff;
         border-color: #3a3a3a;
-        border-bottom: 1px solid #262626; /* Merges seamlessly with content area */
         position: relative;
         z-index: 2;
+        height: 32px;
     }
 
-    /* Truncate long file paths nicely */
     .tab-item span {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -97,32 +132,88 @@
         flex-grow: 1;
     }
 
-    /* Close button (x) */
+    /* Close button inside tab */
     .tab-item button {
         background: transparent;
         border: none;
         color: #888888;
         cursor: pointer;
-        font-size: 12px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
+        font-size: 14px;
+        width: 4px;
+        height: 22px;
+        padding-bottom: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background-color 0.1s, color 0.1s;
+        box-shadow: none;
     }
 
-    /* Close button hover state */
     .tab-item button:hover {
         background-color: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Extra action button (like Open File) inside titlebar */
+    .action-btn {
+        background-color: transparent;
+        border: 1px solid #3a3a3a;
+        color: #cccccc;
+        font-size: 12px;
+        padding: 4px 10px;
+        margin-left: 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background-color 0.1s;
+    }
+
+    .action-btn:hover {
+        background-color: #333333;
+        color: #ffffff;
+    }
+
+    /* Native-style Window Control Buttons (Right side) */
+    .window-controls {
+        display: flex;
+        height: 100%;
+        flex-shrink: 0;
+    }
+
+    .win-btn {
+        background: transparent;
+        border: none;
+        color: #a0a0a0;
+        width: 46px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        box-shadow: none;
+    }
+
+    .win-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    .win-btn.close:hover {
+        background-color: #e81123; /* Windows close red */
+        color: #ffffff;
+    }
+
+    /* Main content fills the rest of the height */
+    .content-area {
+        flex-grow: 1;
+        overflow-y: auto;
+        background-color: #262626;
         color: #ffffff;
     }
 </style>
 
 @code {
-
-    // Static reference so Tauri's JS event trigger can hit this component instance
     private static EditorLayout? _instance;
     public EditorWorkspaceService WorkspaceService => Workspace;
 
@@ -136,14 +227,12 @@
     {
         if (firstRender)
         {
-            // 1. Listen for runtime events when the app is already open and another file is double-clicked
             await JS.InvokeVoidAsync("eval", @"
                 window.__TAURI__.event.listen('open-file-from-os', (event) => {
                     DotNet.invokeMethodAsync('GTDialogueViewer', 'HandleExternalFiles', event.payload);
                 });
             ");
 
-            // 2. Check for initial command line arguments (cold launch by double-clicking a file)
             try
             {
                 var argv = await JS.InvokeAsync<string[]>("window.__TAURI__.core.invoke", "get_startup_args");
@@ -152,10 +241,7 @@
                     await Workspace.HandleExternalFilesInternal(argv.ToList());
                 }
             }
-            catch
-            {
-                // Fallback if command invoke isn't registered yet
-            }
+            catch { }
         }
     }
 
@@ -163,6 +249,11 @@
     {
         Workspace.ReorderTabs(indices.oldIndex, indices.newIndex);
     }
+
+    // Window control invocations using Tauri's window API
+    private async Task MinimizeWindow() => await JS.InvokeVoidAsync("window.appWindowControls.minimize");
+    private async Task MaximizeWindow() => await JS.InvokeVoidAsync("window.appWindowControls.toggleMaximize");
+    private async Task CloseWindow() => await JS.InvokeVoidAsync("window.appWindowControls.close");
 
     [JSInvokable]
     public static async Task HandleExternalFiles(List<string> args)

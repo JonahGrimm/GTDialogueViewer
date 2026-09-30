@@ -1,6 +1,9 @@
 .logo.blazor:hover {
   filter: drop-shadow(0 0 2em #5c2d91);
 }
+body {
+    margin: 0;
+}
 :root {
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
   font-size: 16px;

@@ -15,7 +15,10 @@
       {
         "title": "GTDialogueViewer",
         "width": 800,
-        "height": 600
+        "height": 600,
+		"decorations": false,
+		"shadow": false,
+		"dragDropEnabled": false
       }
     ],
     "security": {
