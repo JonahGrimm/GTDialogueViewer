@@ -23,17 +23,15 @@
         try
         {
             // Re-initialize SortableJS on render passes so it survives Blazor DOM updates
-            await JS.InvokeVoidAsync("window.initSortable", containerRef, objRef);
+            await JS.InvokeVoidAsync("initSortable", containerRef, objRef);
         }
-        catch
-        {
-            // Suppress during initial prerendering
-        }
+        catch (Exception ex) { }
     }
 
     [JSInvokable]
     public async Task ReorderTabs(int oldIndex, int newIndex)
     {
+        Console.WriteLine(("ReorderTabs"));
         await OnReorder.InvokeAsync((oldIndex, newIndex));
     }
 

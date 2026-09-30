@@ -1,14 +1,14 @@
-﻿window.sortableInterop = {
-    init: function (elementId, dotNetHelper) {
-        var el = document.getElementById(elementId);
-        if (!el) return;
+﻿initSortable = function (element, dotNetHelper) {
+    if (!element) return;
 
-        Sortable.create(el, {
-            animation: 150,
-            onEnd: function (evt) {
-                // Notify Blazor when dragging finishes
-                dotNetHelper.invokeMethodAsync('OnReorder', evt.oldIndex, evt.newIndex);
-            }
-        });
-    }
+    Sortable.create(element, {
+        animation: 150,
+        direction: 'horizontal',
+        draggable: '.tab-item',
+        filter: 'button',
+        preventOnFilter: false,
+        onEnd: function (evt) {
+            dotNetHelper.invokeMethodAsync('ReorderTabs', evt.oldIndex, evt.newIndex);
+        }
+    });
 };
