@@ -22,12 +22,11 @@
                 }
             </SortableList>
             
-            <!-- Browse file button inside titlebar -->
-            <button class="action-btn" @onclick="Workspace.OpenFilePrompt">📁 Open</button>
         </div>
 
         <!-- Right side: Window Control Buttons (Minimize, Maximize, Close) -->
         <div class="window-controls">
+            <button class="action-btn" @onclick="Workspace.OpenFilePrompt">📁 Open</button>
             <button class="win-btn minimize" @onclick="MinimizeWindow">&#x2013;</button>
             <button class="win-btn maximize" @onclick="MaximizeWindow">&#x25A2;</button>
             <button class="win-btn close" @onclick="CloseWindow">&#x2715;</button>
@@ -92,6 +91,7 @@
         overflow-y: hidden;
         flex-grow: 1;
         min-width: 0;
+        padding-right: 40px;
     }
 
     /* Hide scrollbars for Chrome, Safari, and Opera */
@@ -173,7 +173,7 @@
     /* Extra action button (like Open File) inside titlebar */
     .action-btn {
         background-color: transparent;
-        border: 1px solid #3a3a3a;
+        border: none;
         color: #cccccc;
         font-size: 12px;
         padding: 4px 10px;
@@ -181,6 +181,7 @@
         border-radius: 4px;
         cursor: pointer;
         flex-shrink: 0;
+        box-shadow: none;
         transition: background-color 0.1s;
     }
 
@@ -194,6 +195,21 @@
         display: flex;
         height: 100%;
         flex-shrink: 0;
+        position: relative;
+    }
+
+    /* The gradient fade overlay */
+    .window-controls::before {
+        content: '';
+        position: absolute;
+        left: -35px; /* Width of the fade transition (adjust as desired) */
+        top: 0;
+        width: 35px;
+        height: 100%;
+        /* Fades from completely transparent to your titlebar/background color (#1e1e1e) */
+        background: linear-gradient(to right, rgba(30, 30, 30, 0), #1e1e1e);
+        pointer-events: none; /* Ensures you can still click things underneath if needed */
+        z-index: 2;
     }
 
     .win-btn {
