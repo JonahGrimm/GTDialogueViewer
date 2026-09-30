@@ -11,7 +11,7 @@
         <!-- Left side: Tabs + Action Buttons wrapped together -->
         <div class="titlebar-left" data-tauri-drag-region>
             <!-- Sortable Tabs Area -->
-            <SortableList class="tabs-container" OnReorder="HandleReorder" data-tauri-drag-region>
+            <SortableList class="tabs-container horizontal-scroll-zone" OnReorder="HandleReorder" data-tauri-drag-region>
                 @foreach (var tab in Workspace.OpenTabs)
                 {
                     <div class="tab-item @(Workspace.ActiveTab == tab ? "active" : "")" 
@@ -71,8 +71,9 @@
     .titlebar-left {
         display: flex;
         align-items: center;
-        overflow-x: auto;
+        overflow: hidden;
         flex-grow: 1;
+        min-width: 0;
         height: 100%;
     }
 
@@ -87,6 +88,20 @@
         height: 100%;
         gap: 3px;
         padding-left: 6px;
+        overflow-x: auto;      
+        overflow-y: hidden;
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    /* Hide scrollbars for Chrome, Safari, and Opera */
+    .tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbars for IE, Edge, and Firefox */
+    .tabs-container {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;     /* Firefox */
     }
 
     /* Individual browser-style tab */
@@ -107,6 +122,7 @@
         border-bottom: none;
         max-width: 220px;
         min-width: 100px;
+        flex-shrink: 0;
         transition: 0.1s ease;
     }
 
