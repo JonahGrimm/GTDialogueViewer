@@ -1,0 +1,64 @@
+﻿@using GTDialogueViewer.Services
+
+@if (ActiveTab != null)
+{
+    <!--<textarea class="form-control font-monospace" rows="15" @bind="ActiveTab.Content"></textarea>-->
+    <div class="diagram-canvas-wrapper">
+        <CascadingValue Value="ActiveTab.Diagram" IsFixed="true">
+            <DiagramCanvas></DiagramCanvas>
+        </CascadingValue>
+    </div>
+}
+
+<style>
+    /* Ensures a seamless, full-screen canvas workspace matching your layout background */
+    .diagram-canvas-wrapper{
+        background-color: #262626; 
+        background-image: radial-gradient(circle at 0 0, rgb(85, 85, 85) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public EditorTab? ActiveTab { get; set; }
+    public BlazorDiagram CurrentDiagram { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        var options = new BlazorDiagramOptions
+        {
+            AllowMultiSelection = false,
+            Zoom =
+            {
+                Enabled = true,
+                Inverse = true,
+            },
+            Links =
+            {
+                DefaultRouter = new NormalRouter(),
+                DefaultPathGenerator = new SmoothPathGenerator()
+            },
+        };
+        
+        CurrentDiagram = new BlazorDiagram(options);
+        
+        var firstNode = CurrentDiagram.Nodes.Add(new NodeModel(position: new Point(50, 50))
+        {
+            Title = "Node 1"
+        });
+        var secondNode = CurrentDiagram.Nodes.Add(new NodeModel(position: new Point(200, 100))
+        {
+            Title = "Node 2"
+        });
+        var leftPort = secondNode.AddPort(PortAlignment.Left);
+        var rightPort = secondNode.AddPort(PortAlignment.Right);
+        
+        // The connection point will be the intersection of
+        // a line going from the target to the center of the source
+        var sourceAnchor = new ShapeIntersectionAnchor(firstNode);
+        // The connection point will be the port's position
+        var targetAnchor = new SinglePortAnchor(leftPort);
+        var link = CurrentDiagram.Links.Add(new LinkModel(sourceAnchor, targetAnchor));
+    }
+}

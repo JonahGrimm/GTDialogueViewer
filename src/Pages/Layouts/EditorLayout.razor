@@ -36,10 +36,9 @@
     
     <!-- Main Content Area -->
     <div class="content-area">
-        @Body
         @if (Workspace.ActiveTab != null)
         {
-            <textarea class="form-control font-monospace" rows="15" @bind="Workspace.ActiveTab.Content" @bind:event="oninput"></textarea>
+            <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab" />
         }
     </div>
 </div>

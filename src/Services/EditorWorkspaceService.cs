@@ -1,15 +1,23 @@
 ﻿using Microsoft.JSInterop;
 using System.IO;
+using Blazor.Diagrams;
+using Blazor.Diagrams.Components;
+using Blazor.Diagrams.Options;
+using Blazor.Diagrams.Core;
+using Blazor.Diagrams.Core.Models;
+using Blazor.Diagrams.Core.PathGenerators;
+using Blazor.Diagrams.Core.Routers;
+using Blazor.Diagrams.Core.Geometry;
+using Blazor.Diagrams.Core.Options;
+using Blazor.Diagrams.Core.Anchors;
 
 namespace GTDialogueViewer.Services;
 
 public class EditorTab
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString();
     public string FilePath { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
-    public bool IsModified { get; set; }
-
+    public BlazorDiagram Diagram { get; set; } = null!;
     public string GetFileName()
     {
         if (string.IsNullOrEmpty(FilePath)) return string.Empty;
@@ -64,7 +72,7 @@ public class EditorWorkspaceService
     {
         foreach (var arg in args)
         {
-            if (!arg.StartsWith("-") && (arg.EndsWith(".gtdialogue", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".po", StringComparison.OrdinalIgnoreCase)))
+            if (!arg.StartsWith("-") && (arg.EndsWith(".gtdialogue", StringComparison.OrdinalIgnoreCase)))
             {
                 if (File.Exists(arg) || await CheckFileExistsBackend(arg))
                 {
@@ -96,7 +104,7 @@ public class EditorWorkspaceService
             {
                 FilePath = path,
                 Content = text,
-                IsModified = false
+                Diagram = CreateInitializedDiagram()
             };
             OpenTabs.Add(newTab);
             SwitchTab(newTab);
@@ -106,6 +114,42 @@ public class EditorWorkspaceService
         {
             await _js.InvokeVoidAsync("alert", $"Error opening file: {ex.Message}");
         }
+    }
+    
+    private BlazorDiagram CreateInitializedDiagram()
+    {
+        var options = new BlazorDiagramOptions
+        {
+            AllowMultiSelection = false,
+            Zoom =
+            {
+                Enabled = true,
+                Inverse = true,
+            },
+            Links =
+            {
+                DefaultRouter = new NormalRouter(),
+                DefaultPathGenerator = new SmoothPathGenerator()
+            },
+        };
+        
+        var diagram = new BlazorDiagram(options);
+        
+        // (Optional) Populate default test nodes or load nodes based on file content here later:
+        var firstNode = diagram.Nodes.Add(new NodeModel(position: new Point(50, 50))
+        {
+            Title = "Node 1"
+        });
+        var secondNode = diagram.Nodes.Add(new NodeModel(position: new Point(200, 100))
+        {
+            Title = "Node 2"
+        });
+        var leftPort = secondNode.AddPort(PortAlignment.Left);
+        var sourceAnchor = new ShapeIntersectionAnchor(firstNode);
+        var targetAnchor = new SinglePortAnchor(leftPort);
+        diagram.Links.Add(new LinkModel(sourceAnchor, targetAnchor));
+
+        return diagram;
     }
 
     public async Task OpenFilePrompt()
