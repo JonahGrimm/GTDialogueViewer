@@ -11,7 +11,7 @@
         <!-- Left side: Tabs + Action Buttons wrapped together -->
         <div class="titlebar-left" data-tauri-drag-region>
             <!-- Sortable Tabs Area -->
-            <SortableList class="tabs-container" OnReorder="HandleReorder">
+            <SortableList class="tabs-container" OnReorder="HandleReorder" data-tauri-drag-region>
                 @foreach (var tab in Workspace.OpenTabs)
                 {
                     <div class="tab-item @(Workspace.ActiveTab == tab ? "active" : "")" 
@@ -95,7 +95,7 @@
         align-items: center;
         gap: 8px;
         padding: 0 4px 0 12px;
-        height: 28px;
+        height: 26px;
         background-color: #292828;
         color: #999999;
         font-size: 12px;
