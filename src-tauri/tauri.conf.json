@@ -23,6 +23,13 @@
     }
   },
   "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["gtdialogue"],
+        "name": "Grimm Tales Dialogue System",
+        "role": "Editor"
+      }
+    ],
     "active": true,
     "targets": "all",
     "icon": [

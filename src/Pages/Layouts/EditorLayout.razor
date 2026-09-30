@@ -1,0 +1,105 @@
+@using GTDialogueViewer.Layout
+
+@inject IJSRuntime JS
+
+<div class="tab-container">
+    <!-- Tab Headers Bar -->
+    <ul class="nav nav-tabs">
+        @foreach (var tab in openTabs)
+        {
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == tab ? "active" : "")" @onclick="() => SwitchTab(tab)">
+                    @tab.FileName
+                    @if (tab.IsModified) { <span class="text-danger"> *</span> }
+                    <span class="ms-2 text-muted" @onclick="() => CloseTab(tab)" @onclick:stopPropagation="true">&times;</span>
+                </button>
+            </li>
+        }
+    </ul>
+
+    <!-- Tab Content Body -->
+    <div class="tab-content border border-top-0 p-3 bg-white">
+        @if (activeTab != null)
+        {
+            <div class="mb-2 text-muted small">Path: @activeTab.FilePath</div>
+
+            @if (activeTab.IsPoFile)
+            {
+                <!-- Render PO file editor view -->
+                <textarea class="form-control" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
+            }
+            else
+            {
+                <!-- Render GTDialogue (JSON) file editor view -->
+                <textarea class="form-control font-monospace" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
+            }
+        }
+        else
+        {
+            <div class="text-muted text-center py-5">
+                <p>No files open. Open a file from the menu or double-click a .gtdialogue file.</p>
+                <button class="btn btn-primary" @onclick="OpenFilePrompt">Browse File...</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<EditorTab> openTabs = new();
+    private EditorTab? activeTab;
+
+    public async Task OpenFile(string path)
+    {
+        var existing = openTabs.FirstOrDefault(t => t.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase));
+        if (existing != null)
+        {
+            SwitchTab(existing);
+            return;
+        }
+
+        try
+        {
+            // Read file contents via Tauri Rust backend instead of C# System.IO
+            string text = await JS.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
+        
+            var newTab = new EditorTab
+            {
+                FilePath = path,
+                Content = text,
+                IsModified = false
+            };
+            openTabs.Add(newTab);
+            SwitchTab(newTab);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error opening file: {ex.Message}");
+        }
+    }
+
+    private void SwitchTab(EditorTab tab) => activeTab = tab;
+
+    private void CloseTab(EditorTab tab)
+    {
+        int index = openTabs.IndexOf(tab);
+        openTabs.Remove(tab);
+        if (activeTab == tab)
+        {
+            activeTab = openTabs.Count > 0 ? openTabs[Math.Max(0, index - 1)] : null;
+        }
+    }
+
+    private void MarkDirty(EditorTab tab) => tab.IsModified = true;
+
+    private async Task OpenFilePrompt()
+    {
+        // Calls your Rust 'open_file_dialog' command and gets back the file path string
+        var path = await JS.InvokeAsync<string?>("window.__TAURI__.core.invoke", "open_file_dialog");
+
+        if (!string.IsNullOrEmpty(path))
+        {
+            await OpenFile(path);
+        }
+    }
+}
