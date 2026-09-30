@@ -1,140 +1,55 @@
-@using GTDialogueViewer.Layout
-@implements IAsyncDisposable
+@using GTDialogueViewer.Services
+@inherits LayoutComponentBase
+@inject EditorWorkspaceService Workspace
 @inject IJSRuntime JS
+@implements IDisposable
 
 <div class="tab-container">
     <!-- Tab Headers Bar (Horizontal & Sortable) -->
-    <ul class="nav-tabs-bar" @ref="tabsContainerRef">
-        @foreach (var tab in openTabs)
+    <SortableList class="tabs-container" OnReorder="HandleReorder">
+        @foreach (var tab in Workspace.OpenTabs)
         {
-            <li class="browser-tab @(activeTab == tab ? "active" : "")" 
-                    @key="tab.Id" 
-                    @onclick="() => SwitchTab(tab)">
-                <span class="tab-title">
-                    @tab.FileName
-                    @if (tab.IsModified) { <span class="text-danger">*</span> }
-                </span>
-                <button class="tab-close-btn" @onclick="() => CloseTab(tab)" @onclick:stopPropagation="true">&times;</button>
-            </li>
+            <div class="tab-item @(Workspace.ActiveTab == tab ? "active" : "")" 
+                 @onclick="() => Workspace.SwitchTab(tab)">
+                <span>@Path.GetFileName(tab.FilePath)</span>
+                <button @onclick:stopPropagation="true" @onclick="() => Workspace.CloseTab(tab)">x</button>
+            </div>
         }
-    </ul>
+    </SortableList>
 
     <!-- Tab Content Body -->
     <div class="tab-content border border-top-0 p-3 bg-white">
-        @if (activeTab != null)
+        @if (Workspace.ActiveTab != null)
         {
-            <div class="mb-2 text-muted small">Path: @activeTab.FilePath</div>
-            <textarea class="form-control font-monospace" rows="15" @bind="activeTab.Content" @bind:event="oninput" @onchange="() => MarkDirty(activeTab)"></textarea>
+            <div class="mb-2 text-muted small">Path: @Workspace.ActiveTab.FilePath</div>
+            <textarea class="form-control font-monospace" rows="15" @bind="Workspace.ActiveTab.Content" @bind:event="oninput"></textarea>
         }
 
         <div class="text-muted text-center py-5">
-            <button class="btn btn-primary" @onclick="OpenFilePrompt">Browse File...</button>
+            <button class="btn btn-primary" @onclick="Workspace.OpenFilePrompt">Browse File...</button>
         </div>
     </div>
 </div>
 
-<style>
-    /* Browser-style horizontal tabs layout */
-    .browser-tab-container {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .nav-tabs-bar {
-        display: flex;
-        flex-direction: row;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        background-color: #f1f3f5;
-        border-bottom: 1px solid #dee2e6;
-        overflow-x: auto;
-        white-space: nowrap;
-        gap: 2px;
-    }
-
-    .browser-tab {
-        display: inline-flex;
-        align-items: center;
-        padding: 8px 16px;
-        background-color: #e9ecef;
-        border: 1px solid transparent;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
-        cursor: pointer;
-        user-select: none;
-        font-size: 14px;
-        max-width: 200px;
-        transition: background-color 0.1s ease;
-    }
-
-    .browser-tab:hover {
-        background-color: #dee2e6;
-    }
-
-    .browser-tab.active {
-        background-color: #ffffff;
-        border-color: #dee2e6 #dee2e6 #ffffff #dee2e6;
-        border-bottom: 2px solid #ffffff;
-        font-weight: 500;
-    }
-
-    .tab-title {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        margin-right: 8px;
-    }
-
-    .tab-close-btn {
-        background: transparent;
-        border: none;
-        font-size: 16px;
-        line-height: 1;
-        color: #6c757d;
-        cursor: pointer;
-        padding: 0 2px;
-        border-radius: 4px;
-    }
-
-    .tab-close-btn:hover {
-        background-color: rgba(0,0,0,0.1);
-        color: #000;
-    }
-
-    /* Sortable ghost element styling */
-    .sortable-ghost {
-        opacity: 0.4;
-        background-color: #ced4da !important;
-    }
-</style>
-
 @code {
-    private ElementReference tabsContainerRef;
-    private IJSObjectReference? sortableModule;
-    
-    private List<EditorTab> openTabs = new();
-    private EditorTab? activeTab;
-    private DotNetObjectReference<EditorLayout>? objRef;
-    // Static reference so JS can call back into the current instance
+
+    // Static reference so Tauri's JS event trigger can hit this component instance
     private static EditorLayout? _instance;
+    public EditorWorkspaceService WorkspaceService => Workspace;
 
     protected override void OnInitialized()
     {
         _instance = this;
+        Workspace.OnChange += StateHasChanged;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            objRef = DotNetObjectReference.Create(this);
-
             // 1. Listen for runtime events when the app is already open and another file is double-clicked
             await JS.InvokeVoidAsync("eval", @"
                 window.__TAURI__.event.listen('open-file-from-os', (event) => {
-                    // event.payload contains argv array from the second instance
                     DotNet.invokeMethodAsync('GTDialogueViewer', 'HandleExternalFiles', event.payload);
                 });
             ");
@@ -145,131 +60,33 @@
                 var argv = await JS.InvokeAsync<string[]>("window.__TAURI__.core.invoke", "get_startup_args");
                 if (argv != null && argv.Length > 0)
                 {
-                    await HandleExternalFilesInternal(argv.ToList());
+                    await Workspace.HandleExternalFilesInternal(argv.ToList());
                 }
             }
             catch
             {
                 // Fallback if command invoke isn't registered yet
             }
-            
-
-        }
-        
-        // Re-initialize SortableJS on every render pass so it survives Blazor DOM updates
-        try
-        {
-            await JS.InvokeVoidAsync("window.initSortable", tabsContainerRef, objRef);
-        }
-        catch
-        {
-            // Suppress during initial prerendering if applicable
         }
     }
-    
-    [JSInvokable]
-    public void ReorderTabs(int oldIndex, int newIndex)
-    {
-        if (oldIndex == newIndex || oldIndex < 0 || newIndex < 0 || oldIndex >= openTabs.Count || newIndex >= openTabs.Count)
-            return;
 
-        var item = openTabs[oldIndex];
-        openTabs.RemoveAt(oldIndex);
-        openTabs.Insert(newIndex, item);
-        StateHasChanged();
+    private void HandleReorder((int oldIndex, int newIndex) indices)
+    {
+        Workspace.ReorderTabs(indices.oldIndex, indices.newIndex);
     }
 
     [JSInvokable]
     public static async Task HandleExternalFiles(List<string> args)
     {
-        if (_instance != null)
+        if (_instance?.Workspace != null)
         {
-            await _instance.HandleExternalFilesInternal(args);
+            await _instance.Workspace.HandleExternalFilesInternal(args);
         }
     }
 
-    private async Task HandleExternalFilesInternal(List<string> args)
+    public void Dispose()
     {
-        // Typically, command-line arguments passed via file associations contain the file path.
-        // We filter out standard flags/executable paths and look for valid files.
-        foreach (var arg in args)
-        {
-            if (!arg.StartsWith("-") && (arg.EndsWith(".gtdialogue", StringComparison.OrdinalIgnoreCase) || arg.EndsWith(".po", StringComparison.OrdinalIgnoreCase)))
-            {
-                if (File.Exists(arg) || await CheckFileExistsBackend(arg))
-                {
-                    await OpenFile(arg);
-                }
-            }
-        }
-    }
-
-    private async Task<bool> CheckFileExistsBackend(string path)
-    {
-        try
-        {
-            // Optional helper if needed, but OpenFile handles reading via backend anyway
-            return true;
-        }
-        catch { return false; }
-    }
-
-    public async Task OpenFile(string path)
-    {
-        var existing = openTabs.FirstOrDefault(t => t.FilePath.Equals(path, StringComparison.OrdinalIgnoreCase));
-        if (existing != null)
-        {
-            SwitchTab(existing);
-            return;
-        }
-
-        try
-        {
-            string text = await JS.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
-        
-            var newTab = new EditorTab
-            {
-                FilePath = path,
-                Content = text,
-                IsModified = false
-            };
-            openTabs.Add(newTab);
-            SwitchTab(newTab);
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"Error opening file: {ex.Message}");
-        }
-    }
-
-    private void SwitchTab(EditorTab tab) => activeTab = tab;
-
-    private void CloseTab(EditorTab tab)
-    {
-        int index = openTabs.IndexOf(tab);
-        openTabs.Remove(tab);
-        if (activeTab == tab)
-        {
-            activeTab = openTabs.Count > 0 ? openTabs[Math.Max(0, index - 1)] : null;
-        }
-    }
-
-    private void MarkDirty(EditorTab tab) => tab.IsModified = true;
-
-    private async Task OpenFilePrompt()
-    {
-        var path = await JS.InvokeAsync<string?>("window.__TAURI__.core.invoke", "open_file_dialog");
-
-        if (!string.IsNullOrEmpty(path))
-        {
-            await OpenFile(path);
-        }
-    }
-
-    public ValueTask DisposeAsync()
-    {
-        objRef?.Dispose();
-        return ValueTask.CompletedTask;
+        Workspace.OnChange -= StateHasChanged;
+        if (_instance == this) _instance = null;
     }
 }

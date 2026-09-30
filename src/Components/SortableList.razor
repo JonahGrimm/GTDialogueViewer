@@ -1,0 +1,45 @@
+﻿@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div @ref="containerRef" @attributes="AdditionalAttributes">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<(int oldIndex, int newIndex)> OnReorder { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private ElementReference containerRef;
+    private DotNetObjectReference<SortableList>? objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+        }
+
+        try
+        {
+            // Re-initialize SortableJS on render passes so it survives Blazor DOM updates
+            await JS.InvokeVoidAsync("window.initSortable", containerRef, objRef);
+        }
+        catch
+        {
+            // Suppress during initial prerendering
+        }
+    }
+
+    [JSInvokable]
+    public async Task ReorderTabs(int oldIndex, int newIndex)
+    {
+        await OnReorder.InvokeAsync((oldIndex, newIndex));
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        objRef?.Dispose();
+        return ValueTask.CompletedTask;
+    }
+}
