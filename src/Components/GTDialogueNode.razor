@@ -1,0 +1,40 @@
+﻿@using Blazor.Diagrams.Components.Renderers;
+@using GTDialogueViewer.Components;
+
+<div class="gtdialogue-node-card">
+    <!-- Colored Top Banner Title -->
+    <div class="node-header">
+        <p class="card-title">Node Title Banner. Here is a pretty long name. I'm just gonna keep typing to see how long it will get. How about this length, huh? maybe?</p>
+    </div>
+
+    <!-- Body Content Area -->
+    <div class="node-body">
+        <div class="ports-flex-row">
+            <!-- Left Port Column -->
+            <div class="port-col left">
+                @foreach (var port in Node.Ports.Where(p => p.Alignment == PortAlignment.Left))
+                {
+                    <div class="port-wrapper">
+                        <PortRenderer @key="port" Port="port" />
+                    </div>
+                }
+            </div>
+
+            <!-- Right Ports Stacked Column -->
+            <div class="port-col right">
+                @foreach (var port in Node.Ports.Where(p => p.Alignment == PortAlignment.Right))
+                {
+                    <div class="port-wrapper">
+                        <span class="port-label">Output Choice</span>
+                        <PortRenderer @key="port" Port="port" />
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    // This gets filled by the library
+    [Parameter] public GTDialogueNodeModel Node { get; set; } = null!;
+}

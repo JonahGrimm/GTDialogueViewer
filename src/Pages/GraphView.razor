@@ -1,21 +1,25 @@
-﻿@using GTDialogueViewer.Services
+﻿@using Blazor.Diagrams.Components.Widgets
+@using GTDialogueViewer.Services
 
 @if (ActiveTab != null)
 {
     <!--<textarea class="form-control font-monospace" rows="15" @bind="ActiveTab.Content"></textarea>-->
     <div class="diagram-canvas-wrapper">
         <CascadingValue Value="ActiveTab.Diagram" IsFixed="true">
-            <DiagramCanvas></DiagramCanvas>
+            <DiagramCanvas>
+                <Widgets>
+                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="#262626" />
+                </Widgets>
+            </DiagramCanvas>
         </CascadingValue>
     </div>
 }
 
 <style>
     /* Ensures a seamless, full-screen canvas workspace matching your layout background */
-    .diagram-canvas-wrapper{
-        background-color: #262626; 
-        background-image: radial-gradient(circle at 0 0, rgb(85, 85, 85) 1px, transparent 1px);
-        background-size: 20px 20px;
+    .grid {
+        background-color: #262626;
+        background-image: linear-gradient(rgb(45, 45, 45) 1px, transparent 1px), linear-gradient(90deg, rgb(45, 45, 45) 1px, transparent 1px) !important;
     }
 </style>
 
