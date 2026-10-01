@@ -56,7 +56,9 @@ a:hover {
 }
 
 h1 {
-  text-align: center;
+    text-align: center;
+    font-size: 1.5em;
+    line-height: 0;
 }
 
 input,
@@ -314,4 +316,23 @@ button {
     overflow-y: auto;
     background-color: #262626;
     color: #ffffff;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    text-align: center;
+    padding: 20px;
+    color: #a0a0a0;
+    min-height: calc(100% - 80px);
+}
+
+.empty-state button {
+    font-size: 20px;
+    padding: 10px 20px 15px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+    border: 1px solid #5c5c5c;
 }

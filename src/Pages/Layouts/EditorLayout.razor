@@ -38,7 +38,15 @@
     <div class="content-area">
         @if (Workspace.ActiveTab != null)
         {
-            <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab" />
+            <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab"/>
+        }
+        else
+        {
+            <div class="empty-state">
+                <h1>Grimm Tales Dialogue Viewer</h1>
+                <p>No dialogue data loaded. Please launch a <b>.gtdialogue</b> file.</p>
+                <button class="action-btn" @onclick="Workspace.OpenFilePrompt">📁 Open</button>
+            </div>
         }
     </div>
 </div>
