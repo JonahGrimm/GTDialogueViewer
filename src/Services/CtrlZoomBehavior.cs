@@ -36,7 +36,7 @@ public class CtrlZoomBehavior : Behavior
 
             // 2. Update layout scale
             double oldScale = layoutScale;
-            double scaleDelta = (e.DeltaY < 0 ? 0.05 : -0.05)*layoutScaleSpeedMultiplier; // Smaller step for smoother scaling
+            double scaleDelta = (e.DeltaY < 0 ? 0.03 : -0.03)*layoutScaleSpeedMultiplier; // Smaller step for smoother scaling
             layoutScale = Math.Clamp(layoutScale + scaleDelta, 0.3, 3.0);
 
             if (layoutScale == oldScale)
