@@ -10,8 +10,8 @@
         @if (SelectedNode != null)
         {
             <div class="divider-line"></div>
-            <FTextField Name="Node Title" Value="@SelectedNode.NodeTitle"></FTextField>
             <FTextField Name="Node Description" Value="@SelectedNode.NodeDescription"></FTextField>
+            <FTextField Name="Node Title" Value="@SelectedNode.NodeTitle"></FTextField>
             @foreach (var Output in SelectedNode.NodeOutputNames)
             {
                 <FTextField Name="Output" Value="@Output"></FTextField>
