@@ -59,6 +59,42 @@
     </div>
 </div>
 
+<script>
+    window.initSplitter = () => {
+        const splitter = document.querySelector('.splitter');
+        const detailsPane = document.querySelector('.details-pane');
+
+        if (!splitter || !detailsPane)
+        {
+            setTimeout(window.initSplitter, 50);
+            return;
+        }
+
+        let isDragging = false;
+        
+        splitter.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            document.body.style.userSelect = 'none'; // Prevent text highlighting
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            console.log(e.clientX);
+            if (!isDragging) return;
+            const newWidth = window.innerWidth - e.clientX;
+            if (newWidth >= 50 && newWidth <= 800) {
+                detailsPane.style.width = newWidth + 'px';
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.userSelect = '';
+            }
+        });
+    };
+</script>
+
 @code {
     private static EditorLayout? _instance;
     public EditorWorkspaceService WorkspaceService => Workspace;
@@ -78,6 +114,8 @@
                     DotNet.invokeMethodAsync('GTDialogueViewer', 'HandleExternalFiles', event.payload);
                 });
             ");
+            
+            await JS.InvokeVoidAsync("initSplitter");
 
             try
             {

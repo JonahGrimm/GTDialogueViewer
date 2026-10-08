@@ -25,9 +25,7 @@
 }
 
 .details-pane {
-    width: 320px;              
-    min-width: 200px;           
-    max-width: 600px;           
+    width: 320px;                   
     height: 100%;
     background-color: #252526;
     border-left: 1px solid #333;
