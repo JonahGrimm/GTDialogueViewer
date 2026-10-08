@@ -47,6 +47,8 @@ public class DiagramBuilder
         diagram.UnregisterBehavior<DragMovablesBehavior>();
         diagram.RegisterBehavior(new CtrlZoomBehavior(diagram));
         diagram.RegisterComponent<GTDialogueNodeModel, GTDialogueNode>();
+        diagram.RegisterComponent<GTDialogueNodeRerouteModel, GTDialogueReroute>();
+        double importPosScalar = 1.2;
         
         if (!string.IsNullOrWhiteSpace(FileTextContent))
         {
@@ -57,33 +59,56 @@ public class DiagramBuilder
 
                 if (graphData?.Graph?.Nodes != null)
                 {
-                    // Dictionary to map PinId strings to actual Blazor.Diagrams PortModels
                     var portLookup = new Dictionary<string, PortModel>();
                     var pendingLinks = new List<(string SourcePinId, string TargetPinId)>();
 
                     foreach (var jsonNode in graphData.Graph.Nodes)
                     {
-                        var position = new Point(jsonNode.Position.X, jsonNode.Position.Y);
+                        var position = new Point(importPosScalar*jsonNode.Position.X, importPosScalar*jsonNode.Position.Y);
+                        NodeModel nodeModel;
 
-                        var nodeModel = new GTDialogueNodeModel(position)
-                        {
-                            NodeTitle = jsonNode.NodeTitle,
-                            NodeDescription = jsonNode.NodeDescription,
-                            NodeOutputNames = jsonNode.NodeOutputNames ?? [],
-                            IconPath = jsonNode.IconPath ?? ""
-                        };
+                        // Check if the node is a reroute node based on its CppClass
+                        bool isReroute = string.Equals(jsonNode.CppClass, "DialogueRerouteNodeInfo", StringComparison.OrdinalIgnoreCase);
 
-                        if (jsonNode.AccentNodeColor != null)
+                        if (isReroute)
                         {
-                            nodeModel.AccentNodeColor = Color.FromArgb(
-                                (int)(jsonNode.AccentNodeColor.A * 255),
-                                (int)(jsonNode.AccentNodeColor.R * 255), 
-                                (int)(jsonNode.AccentNodeColor.G * 255), 
-                                (int)(jsonNode.AccentNodeColor.B * 255)
-                            );
+                            nodeModel = new GTDialogueNodeRerouteModel(position);
+                        }
+                        else
+                        {
+                            // Instantiate standard dialogue node
+                            var dialogueNode = new GTDialogueNodeModel(position)
+                            {
+                                NodeTitle = jsonNode.NodeTitle,
+                                NodeDescription = jsonNode.NodeDescription,
+                                NodeOutputNames = jsonNode.NodeOutputNames ?? [],
+                                IconPath = jsonNode.IconPath ?? ""
+                            };
+                            if (jsonNode.AccentNodeColor != null)
+                            {
+                                dialogueNode.AccentNodeColor = Color.FromArgb(
+                                    (int)(jsonNode.AccentNodeColor.A * 255),
+                                    (int)(jsonNode.AccentNodeColor.R * 255), 
+                                    (int)(jsonNode.AccentNodeColor.G * 255), 
+                                    (int)(jsonNode.AccentNodeColor.B * 255)
+                                );
+                            }
+
+                            if (string.Equals(jsonNode.CppClass, "DialogueRuntimeNode_Start", StringComparison.OrdinalIgnoreCase))
+                            {
+                                dialogueNode.NodeTitle = new FText("Start", "", "");
+                                dialogueNode.AccentNodeColor = Color.FromArgb(
+                                    255,
+                                    255, 
+                                    0, 
+                                    0
+                                );
+                            }
+                            
+                            nodeModel = dialogueNode;
                         }
 
-                        // 1. Create Input Port if present
+                        // 1. Create Input Port if present (works for both standard & reroute nodes)
                         if (jsonNode.InputPin != null && !string.IsNullOrEmpty(jsonNode.InputPin.PinId))
                         {
                             var inputPort = nodeModel.AddPort(PortAlignment.Left);

@@ -1,0 +1,56 @@
+.gtdialogue-node-card {
+    width: 90px;
+    outline: 1px solid black;
+    padding: 0px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: rgba(0, 0, 0, 0.44);
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s ease;
+    margin-top: -8px;
+}
+
+.gtdialogue-node-card.not-localizable-node {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.gtdialogue-node-card:hover, .gtdialogue-node-card:hover > .node-header {
+    background-color: rgba(0.1, 0.1, 0.1, 0.6);
+    outline-color: #fefefe;
+}
+
+.node-body {
+    padding: 4px 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+}
+
+/* Individual port row alignment for the right stack */
+.port-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 20px; /* Gives each right output a consistent vertical row slot */
+}
+
+::deep .diagram-port {
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border: 2px solid #1e1e1e;
+    border-radius: 100px;
+    cursor: pointer;
+
+    /* Reset layout positioning so the library's math matches the visual center */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::deep .diagram-port:hover {
+    background-color: #4ea7fc;
+}

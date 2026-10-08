@@ -1,0 +1,19 @@
+﻿@using Blazor.Diagrams.Components.Renderers;
+@using GTDialogueViewer.Components;
+
+<div class="gtdialogue-node-card">
+    <!-- Body Content Area -->
+    <div class="node-body">
+        @foreach (var port in Node.Ports)
+        {
+            <div class="port-wrapper">
+                <PortRenderer @key="port" Port="port" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    // This gets filled by the library
+    [Parameter] public GTDialogueNodeRerouteModel Node { get; set; } = null!;
+}

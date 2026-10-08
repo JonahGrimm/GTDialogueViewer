@@ -1,9 +1,9 @@
 ﻿@using Blazor.Diagrams.Components.Renderers;
 @using GTDialogueViewer.Components;
 
-<div class="gtdialogue-node-card @(Node.NodeTitle.IsLocalizable ? "localizable-node" : "not-localizable-node")">
-                                                                 <!-- Colored Top Banner Title -->
-    <div class="node-header" style="background-color: rgba(@Node.AccentNodeColor.R, @Node.AccentNodeColor.G, @Node.AccentNodeColor.B, @((Node.AccentNodeColor.A/255)*(Node.NodeTitle.IsLocalizable ? 0.5 : 0.15)))">
+<div class="gtdialogue-node-card @(Node.NodeTitle.IsLocalizable ? "localizable-node" : "not-localizable-node")" style="width: @(Node.GetNodeLength())px">
+    <!-- Colored Top Banner Title -->
+    <div class="node-header" style="background-color: rgba(@Node.AccentNodeColor.R, @Node.AccentNodeColor.G, @Node.AccentNodeColor.B, @((Node.AccentNodeColor.A/255)*(Node.NodeTitle.IsLocalizable ? 0.4 : 0.15)))">
         <p class="card-title @(Node.NodeTitle.IsLocalizable ? "localizable-text" : "not-localizable-text")">
             @Node.NodeTitle.GetText()
         </p>

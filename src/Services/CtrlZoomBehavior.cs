@@ -1,6 +1,7 @@
 ﻿using Blazor.Diagrams.Core;
 using Blazor.Diagrams.Core.Behaviors;
 using Blazor.Diagrams.Core.Events;
+using Blazor.Diagrams.Core.Models;
 using GTDialogueViewer.Components;
 
 namespace GTDialogueViewer.Services;
@@ -46,7 +47,7 @@ public class CtrlZoomBehavior : Behavior
             // 3. Batch update node positions relative to the mouse pivot
             this.Diagram.Batch(() =>
             {
-                foreach (var node in this.Diagram.Nodes.OfType<GTDialogueNodeModel>())
+                foreach (var node in this.Diagram.Nodes.OfType<NodeModel>())
                 {
                     // Scale position relative to the mouse world coordinate pivot
                     double newX = mouseWorldX + (node.Position.X - mouseWorldX) * scaleRatio;
