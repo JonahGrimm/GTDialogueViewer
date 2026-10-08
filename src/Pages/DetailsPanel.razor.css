@@ -1,0 +1,16 @@
+.details-panel-wrapper {
+    padding: 16px;
+}
+
+h1 {
+    font-size: 1em;
+    margin-bottom: 25px;
+}
+
+.divider-line {
+    height: 1px;
+    width: 100%;
+    background-color: #898989; /* Darker border color for separation */
+    border: none;
+    margin: 20px 0; /* Adjust vertical spacing as needed */
+}

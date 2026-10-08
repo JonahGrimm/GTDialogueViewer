@@ -1,16 +1,19 @@
 ﻿@using Blazor.Diagrams.Components.Widgets
+@using GTDialogueViewer.Components
 @using GTDialogueViewer.Services
 
 @if (ActiveTab != null)
 {
     <!--<textarea class="form-control font-monospace" rows="15" @bind="ActiveTab.Content"></textarea>-->
     <div class="diagram-canvas-wrapper">
-        <CascadingValue Value="ActiveTab.Diagram" IsFixed="true">
-            <DiagramCanvas>
-                <Widgets>
-                    <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="#262626" />
-                </Widgets>
-            </DiagramCanvas>
+        <CascadingValue Value="OnNodeSelected" IsFixed="true">
+            <CascadingValue Value="ActiveTab.Diagram" IsFixed="true">
+                <DiagramCanvas>
+                    <Widgets>
+                        <GridWidget Size="30" Mode="GridMode.Line" BackgroundColor="#262626"/>
+                    </Widgets>
+                </DiagramCanvas>
+            </CascadingValue>
         </CascadingValue>
     </div>
 }
@@ -26,4 +29,18 @@
 @code {
     [Parameter]
     public EditorTab? ActiveTab { get; set; }
+    
+    [Parameter]
+    public EventCallback<GTDialogueNodeModel> OnNodeSelectedChanged { get; set; }
+
+    private void OnNodeSelected(GTDialogueNodeModel node)
+    {
+        if (ActiveTab != null)
+        {
+            ActiveTab.SelectedNode = node; 
+            StateHasChanged();
+        }
+
+        OnNodeSelectedChanged.InvokeAsync(node);
+    }
 }

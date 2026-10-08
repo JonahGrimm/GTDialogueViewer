@@ -1,0 +1,22 @@
+.property-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 3px;
+    font-size: 0.75em;
+}
+
+.property-name {
+    flex: .6;
+    background-color: #313131; /* Slightly darker background */
+    padding: 2px 12px;
+    color: #fff;
+}
+
+.property-value {
+    flex: 1;
+    background-color: #404040; /* Slightly brighter background */
+    padding: 2px 12px;
+    color: #ddd;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}

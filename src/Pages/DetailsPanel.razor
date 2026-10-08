@@ -1,1 +1,27 @@
-﻿
+﻿@using GTDialogueViewer.Components
+@using GTDialogueViewer.Services
+
+@if (ActiveTab != null)
+{
+    <div class="details-panel-wrapper">
+        <h1>@(ActiveTab.GetFileName())</h1>
+        <StringField Name="Reader Type" Value="@ActiveTab.AssetData.ReaderType"></StringField>
+        <StringField Name="Context Comment" Value="@ActiveTab.AssetData.ContextComment"></StringField>
+        @if (SelectedNode != null)
+        {
+            <div class="divider-line"></div>
+            <FTextField Name="Node Title" Value="@SelectedNode.NodeTitle"></FTextField>
+            <FTextField Name="Node Description" Value="@SelectedNode.NodeDescription"></FTextField>
+            @foreach (var Output in SelectedNode.NodeOutputNames)
+            {
+                <FTextField Name="Output" Value="@Output"></FTextField>
+            }
+        }
+    </div>
+}
+
+@code 
+{
+    [Parameter] public EditorTab? ActiveTab { get; set; }
+    [Parameter] public GTDialogueNodeModel? SelectedNode { get; set; }
+}

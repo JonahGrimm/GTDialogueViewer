@@ -39,13 +39,13 @@
         @if (Workspace.ActiveTab != null)
         {
             <div class="graph-pane">
-                <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab"/>
+                <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab" OnNodeSelectedChanged="StateHasChanged"/>
             </div>
             
             <div class="splitter"></div>
             
             <div class="details-pane">
-                <DetailsPanel/>
+                <DetailsPanel @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab" SelectedNode="Workspace.ActiveTab?.SelectedNode"/>
             </div>
         }
         else
@@ -81,7 +81,7 @@
             console.log(e.clientX);
             if (!isDragging) return;
             const newWidth = window.innerWidth - e.clientX;
-            if (newWidth >= 50 && newWidth <= 800) {
+            if (newWidth >= 265 && newWidth <= 800) {
                 detailsPane.style.width = newWidth + 'px';
             }
         });

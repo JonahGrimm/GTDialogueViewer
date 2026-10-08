@@ -15,10 +15,18 @@ using Point = Blazor.Diagrams.Core.Geometry.Point;
 
 namespace GTDialogueViewer.Services;
 
+public struct DialogueAssetData
+{
+    public string ReaderType { get; set; }
+    public string ContextComment { get; set; }
+}
+
 public class DiagramBuilder
 {
-    public static BlazorDiagram CreateInitializedDiagram(string FileTextContent)
+    public static BlazorDiagram CreateInitializedDiagram(string FileTextContent, out DialogueAssetData DialogueAssetData)
     {
+        DialogueAssetData = new DialogueAssetData();
+        
         var options = new BlazorDiagramOptions
         {
             AllowMultiSelection = false,
@@ -56,6 +64,8 @@ public class DiagramBuilder
             {
                 var optionsJson = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var graphData = JsonSerializer.Deserialize<DialogueGraphData>(FileTextContent, optionsJson);
+                DialogueAssetData.ReaderType = graphData?.ReaderType ?? "";
+                DialogueAssetData.ContextComment = graphData?.ContextComment ?? "";
 
                 if (graphData?.Graph?.Nodes != null)
                 {

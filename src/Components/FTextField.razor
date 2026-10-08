@@ -1,0 +1,10 @@
+﻿<div class="property-row">
+    <div class="property-name">@Name</div>
+    <div class="property-value">@((MarkupString)Value.GetText())</div>
+</div>
+
+@code
+{
+    [Parameter] public string? Name { get; set; }
+    [Parameter] public FText Value { get; set; }
+}

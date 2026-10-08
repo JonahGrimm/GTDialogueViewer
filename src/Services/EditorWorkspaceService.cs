@@ -1,6 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System.IO;
 using Blazor.Diagrams;
+using GTDialogueViewer.Components;
 
 namespace GTDialogueViewer.Services;
 
@@ -9,6 +10,9 @@ public class EditorTab
     public string FilePath { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public BlazorDiagram Diagram { get; set; } = null!;
+    public DialogueAssetData AssetData { get; set; } = new();
+    public GTDialogueNodeModel? SelectedNode { get; set; }
+    
     public string GetFileName()
     {
         if (string.IsNullOrEmpty(FilePath)) return string.Empty;
@@ -90,13 +94,14 @@ public class EditorWorkspaceService
         try
         {
             string text = await _js.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
-        
+
             var newTab = new EditorTab
             {
                 FilePath = path,
                 Content = text,
-                Diagram = DiagramBuilder.CreateInitializedDiagram(text)
+                Diagram = DiagramBuilder.CreateInitializedDiagram(text, out var AssetData)
             };
+            newTab.AssetData = AssetData;
             OpenTabs.Add(newTab);
             SwitchTab(newTab);
             NotifyStateChanged();

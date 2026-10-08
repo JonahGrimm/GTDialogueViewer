@@ -5,6 +5,8 @@ namespace GTDialogueViewer.Services;
 
 public class DialogueGraphData
 {
+    [JsonPropertyName("ReaderType")] public string ReaderType { get; set; } = "";
+    [JsonPropertyName("ContextComment")] public string ContextComment { get; set; } = "";
     [JsonPropertyName("Graph")] public GraphData Graph { get; set; } = new();
 }
 

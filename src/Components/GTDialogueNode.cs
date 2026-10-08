@@ -17,7 +17,7 @@ public struct FText(string sourceString, string key, string table)
         return GetText().Length * 9;
     }
 
-public bool IsLocalizable
+    public bool IsLocalizable
     {
         get => !string.IsNullOrEmpty(Table) && !string.IsNullOrEmpty(Key);
     }
