@@ -6,7 +6,8 @@
 }
 
 .property-name {
-    flex: .6;
+    width: 100px;
+    flex: 0 0 100px;
     background-color: #313131; /* Slightly darker background */
     padding: 2px 12px;
     color: #fff;

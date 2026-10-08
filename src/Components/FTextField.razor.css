@@ -6,17 +6,100 @@
 }
 
 .property-name {
-    flex: .6;
-    background-color: #313131; /* Slightly darker background */
-    padding: 2px 12px;
+    width: 100px;
+    flex: 0 0 100px;
+    background-color: #313131;
+    padding: 4px 12px;
     color: #fff;
+    display: flex;
+    align-items: center;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.property-name.localizable-text {
+    background-color: #262B26;
 }
 
 .property-value {
     flex: 1;
-    background-color: #404040; /* Slightly brighter background */
-    padding: 2px 12px;
+    min-width: 0;          /* CRITICAL: Allows flex child to shrink below content size and wrap properly */
+    background-color: #404040;
+    padding: 4px 12px;
     color: #ddd;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     word-break: break-word;
     overflow-wrap: anywhere;
+}
+
+.property-value.localizable-text {
+    background-color: #363D35;
+}
+
+.standard-value {
+    width: 100%;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.localized-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    min-width: 0;          /* Prevents internal stack from blowing out parent width */
+    margin-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 6px;
+}
+
+.localized-box {
+    display: flex;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 3px 6px;
+    border-radius: 3px;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;          /* Prevents box from overflowing */
+    box-sizing: border-box;
+}
+
+.copy-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #ccc;
+    border-radius: 2px;
+    cursor: pointer;
+    padding: 1px 5px;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.copy-btn:hover {
+    background-color: #4ea7fc;
+    color: #fff;
+    border-color: #4ea7fc;
+}
+
+.box-label {
+    color: #aaa;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.box-text {
+    color: #eee;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    min-width: 0;          /* Allows flex item text ellipsis to truncate correctly instead of expanding */
+    flex: 1;
 }

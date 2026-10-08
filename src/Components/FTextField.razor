@@ -1,10 +1,42 @@
-﻿<div class="property-row">
-    <div class="property-name">@Name</div>
-    <div class="property-value">@((MarkupString)Value.GetText())</div>
+﻿@inject IJSRuntime JS
+
+<div class="property-row">
+    <div class="property-name @(Value.IsLocalizable ? "localizable-text" : "")">@Name</div>
+    <div class="property-value @(Value.IsLocalizable ? "localizable-text" : "")">
+        <!-- GetText() is always displayed first -->
+        <div class="standard-value">
+            @((MarkupString)Value.GetText())
+        </div>
+
+        <!-- If localizable, show the key and table boxes below -->
+        @if (Value.IsLocalizable)
+        {
+            <div class="localized-stack">
+                <div class="localized-box">
+                    <button class="copy-btn" @onclick="() => CopyToClipboard(Value.Key)" title="Copy Key">📋</button>
+                    <span class="box-label">Key:</span>
+                    <span class="box-text">@Value.Key</span>
+                </div>
+                <div class="localized-box">
+                    <button class="copy-btn" @onclick="() => CopyToClipboard(Value.Table)" title="Copy Table">📋</button>
+                    <span class="box-label">Table:</span>
+                    <span class="box-text">@Value.Table</span>
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
 @code
 {
     [Parameter] public string? Name { get; set; }
     [Parameter] public FText Value { get; set; }
+    
+    private async Task CopyToClipboard(string text)
+    {
+        if (!string.IsNullOrEmpty(text))
+        {
+            await JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+        }
+    }
 }
