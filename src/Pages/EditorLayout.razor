@@ -38,7 +38,15 @@
     <div class="content-area">
         @if (Workspace.ActiveTab != null)
         {
-            <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab"/>
+            <div class="graph-pane">
+                <GraphView @key="Workspace.ActiveTab" ActiveTab="Workspace.ActiveTab"/>
+            </div>
+            
+            <div class="splitter"></div>
+            
+            <div class="details-pane">
+                <DetailsPanel/>
+            </div>
         }
         else
         {
@@ -54,7 +62,7 @@
 @code {
     private static EditorLayout? _instance;
     public EditorWorkspaceService WorkspaceService => Workspace;
-
+    
     protected override void OnInitialized()
     {
         _instance = this;
