@@ -2,7 +2,7 @@
 using Blazor.Diagrams.Core.Models;
 using Point = Blazor.Diagrams.Core.Geometry.Point;
 
-namespace GTDialogueViewer.Components;
+namespace GTDialogueViewer.Nodes;
 
 public struct FText(string sourceString, string key, string table)
 {

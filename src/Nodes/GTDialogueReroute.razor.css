@@ -10,6 +10,7 @@
     flex-direction: column;
     transition: 0.2s ease;
     margin-top: -8px;
+    z-index: 2;
 }
 
 .gtdialogue-node-card.not-localizable-node {

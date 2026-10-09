@@ -1,0 +1,141 @@
+﻿.gtdialogue-node-card {
+    width: 400px;
+    outline: 1px solid black;
+    padding: 0px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: rgba(0, 0, 0, 0.44);
+    border-radius: 0 0 15px 15px;
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+    transition: 0.2s ease;
+    margin-top: 16px;
+    z-index: 2;
+}
+
+.gtdialogue-node-card.not-localizable-node {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.gtdialogue-node-card:hover, .gtdialogue-node-card:hover > .node-header {
+    background-color: rgba(0.1, 0.1, 0.1, 0.6);
+    outline-color: #fefefe;
+}
+
+/* Colored Header Banner */
+.node-header {
+    background-color: #3b3b3b; /* Distinct background color for the banner */
+    padding: 4px 16px;         /* Tight padding instead of large card padding */
+    border-bottom: 1px solid #2a2a2a;
+    transition: 0.2s ease;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    
+    /* Truncate text if it's too long */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.node-body {
+    padding: 0px 20px 8px 20px;       
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Flex layout separating left input from right output stacks */
+.ports-flex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-top: 6px;
+}
+
+.port-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.port-col.left {
+    align-items: flex-start;
+}
+
+.port-col.right {
+    align-items: flex-end;
+    flex-grow: 1;
+}
+
+/* Individual port row alignment for the right stack */
+.port-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 20px; /* Gives each right output a consistent vertical row slot */
+}
+
+.port-label {
+    font-size: 14px;
+}
+
+.port-label.not-localizable-text {
+    color: #b0b0b0;
+}
+
+::deep .diagram-port {
+    width: 14px;
+    height: 14px;
+    background-color: #ffffff;
+    border: 2px solid #1e1e1e;
+    border-radius: 100px;
+    cursor: pointer;
+
+    /* Reset layout positioning so the library's math matches the visual center */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::deep .diagram-port:hover {
+    background-color: #4ea7fc;
+}
+
+.localizable-text.card-title {
+
+}
+
+.not-localizable-text.card-title {
+    color: #aaaaaa;
+}
+
+.node-card {
+    position: relative; /* Crucial: establishes a positioning context for the header */
+    display: flex;
+    flex-direction: column;
+}
+
+.node-header {
+    position: absolute;
+    bottom: calc(100% - 14px);       /* Pins the bottom of the header directly to the top of the card */
+    left: 0;
+    right: 0;
+    margin-bottom: 0px; /* Optional: adds a small gap between the floating header and the body */
+    box-sizing: border-box;
+    outline: 1px solid black;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    background-color: rgba(0, 0, 0, 0.44);
+    border-radius: 15px 15px 0 0;
+    /* keep your background, padding, and border styles here */
+}
+
+.node-body {
+    /* Your body container remains the static anchor point for the ports */
+    position: relative;
+}

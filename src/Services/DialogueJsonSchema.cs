@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using GTDialogueViewer.Components;
+using GTDialogueViewer.Nodes;
 
 namespace GTDialogueViewer.Services;
 
@@ -13,6 +13,7 @@ public class DialogueGraphData
 public class GraphData
 {
     [JsonPropertyName("Nodes")] public List<DialogueJsonNode> Nodes { get; set; } = [];
+    [JsonPropertyName("Comments")] public List<CommentJsonNode> Comments { get; set; } = [];
 }
 
 public class DialogueJsonNode
@@ -27,6 +28,14 @@ public class DialogueJsonNode
     
     [JsonPropertyName("InputPin")] public PinData? InputPin { get; set; }
     [JsonPropertyName("OutputPins")] public PinData[] OutputPins { get; set; } = [];
+}
+
+public class CommentJsonNode
+{
+    [JsonPropertyName("Comment")] public string CommentText { get; set; } = "";
+    [JsonPropertyName("Position")] public PositionData Position { get; set; } = new();
+    [JsonPropertyName("Size")] public PositionData Size { get; set; } = new();
+    [JsonPropertyName("CommentColor")] public AccentColor CommentColor { get; set; } = new();
 }
 
 public class PinData

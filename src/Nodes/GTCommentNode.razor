@@ -1,0 +1,27 @@
+﻿@using Blazor.Diagrams.Components.Renderers;
+@using GTDialogueViewer.Nodes;
+
+<div class="comment-node-card" style="width: @(Node.NodeSize.X)px; height: @(Node.NodeSize.Y)px; background-color: rgba(@Node.AccentNodeColor.R, @Node.AccentNodeColor.G, @Node.AccentNodeColor.B, @((Node.AccentNodeColor.A/255)*0.35))">
+    <!-- Colored Top Banner Title -->
+    <div class="node-header">
+        <p class="card-title">
+            @Node.Comment
+        </p>
+    </div>
+    
+    <!-- Body Content Area -->
+    <div class="node-body">
+        <div class="ports-flex-row">
+            <!-- Left Port Column -->
+            <div class="port-col left">
+                <div class="port-wrapper">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public GTCommentNodeModel Node { get; set; } = null!;
+}

@@ -10,8 +10,9 @@ using Blazor.Diagrams.Core.Routers;
 using Blazor.Diagrams.Core.Options;
 using Blazor.Diagrams.Core.Anchors;
 using Blazor.Diagrams.Core.Behaviors;
-using GTDialogueViewer.Components;
+using GTDialogueViewer.Nodes;
 using Point = Blazor.Diagrams.Core.Geometry.Point;
+using Size = Blazor.Diagrams.Core.Geometry.Size;
 
 namespace GTDialogueViewer.Services;
 
@@ -56,6 +57,7 @@ public class DiagramBuilder
         diagram.RegisterBehavior(new CtrlZoomBehavior(diagram));
         diagram.RegisterComponent<GTDialogueNodeModel, GTDialogueNode>();
         diagram.RegisterComponent<GTDialogueNodeRerouteModel, GTDialogueReroute>();
+        diagram.RegisterComponent<GTCommentNodeModel, GTCommentNode>();
         double importPosScalar = 1.2;
         
         if (!string.IsNullOrWhiteSpace(FileTextContent))
@@ -66,6 +68,32 @@ public class DiagramBuilder
                 var graphData = JsonSerializer.Deserialize<DialogueGraphData>(FileTextContent, optionsJson);
                 DialogueAssetData.ReaderType = graphData?.ReaderType ?? "";
                 DialogueAssetData.ContextComment = graphData?.ContextComment ?? "";
+                
+                if (graphData?.Graph?.Comments != null)
+                {
+                    foreach (var jsonNode in graphData.Graph.Comments)
+                    {
+                        var position = new Point(importPosScalar*jsonNode.Position.X, importPosScalar*jsonNode.Position.Y);
+                        
+                        // Instantiate standard dialogue node
+                        GTCommentNodeModel commentNode = new GTCommentNodeModel(position)
+                        {
+                            Comment = jsonNode.CommentText,
+                            NodeSize = new Point(importPosScalar*jsonNode.Size.X, importPosScalar*jsonNode.Size.Y)
+                        };
+                        if (jsonNode.CommentColor != null)
+                        {
+                            commentNode.AccentNodeColor = Color.FromArgb(
+                                (int)(jsonNode.CommentColor.A * 255),
+                                (int)(jsonNode.CommentColor.R * 255), 
+                                (int)(jsonNode.CommentColor.G * 255), 
+                                (int)(jsonNode.CommentColor.B * 255)
+                            );
+                        }
+
+                        diagram.Nodes.Add(commentNode);
+                    }
+                }
 
                 if (graphData?.Graph?.Nodes != null)
                 {

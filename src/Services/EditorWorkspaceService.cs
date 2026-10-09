@@ -1,7 +1,7 @@
 ﻿using Microsoft.JSInterop;
 using System.IO;
 using Blazor.Diagrams;
-using GTDialogueViewer.Components;
+using GTDialogueViewer.Nodes;
 
 namespace GTDialogueViewer.Services;
 

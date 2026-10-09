@@ -1,24 +1,20 @@
-﻿.gtdialogue-node-card {
+.comment-node-card {
     width: 400px;
     outline: 1px solid black;
     padding: 0px;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     background-color: rgba(0, 0, 0, 0.44);
     border-radius: 0 0 15px 15px;
-    overflow: hidden; 
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: 0.2s ease;
     margin-top: 16px;
+    z-index: 1;
 }
 
-.gtdialogue-node-card.not-localizable-node {
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-.gtdialogue-node-card:hover, .gtdialogue-node-card:hover > .node-header {
-    background-color: rgba(0.1, 0.1, 0.1, 0.6);
-    outline-color: #fefefe;
+.comment-node-card:hover, .comment-node-card:hover > .node-header {
+    outline-color: #a5a5a5;
 }
 
 /* Colored Header Banner */
@@ -34,7 +30,7 @@
     font-size: 16px;
     font-weight: 600;
     color: #ffffff;
-    
+
     /* Truncate text if it's too long */
     overflow: hidden;
     text-overflow: ellipsis;
@@ -42,7 +38,7 @@
 }
 
 .node-body {
-    padding: 0px 20px 8px 20px;       
+    padding: 0px 20px 8px 20px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -83,10 +79,6 @@
     font-size: 14px;
 }
 
-.port-label.not-localizable-text {
-    color: #b0b0b0;
-}
-
 ::deep .diagram-port {
     width: 14px;
     height: 14px;
@@ -106,14 +98,6 @@
     background-color: #4ea7fc;
 }
 
-.localizable-text.card-title {
-
-}
-
-.not-localizable-text.card-title {
-    color: #aaaaaa;
-}
-
 .node-card {
     position: relative; /* Crucial: establishes a positioning context for the header */
     display: flex;
@@ -129,7 +113,6 @@
     box-sizing: border-box;
     outline: 1px solid black;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-    background-color: rgba(0, 0, 0, 0.44);
     border-radius: 15px 15px 0 0;
     /* keep your background, padding, and border styles here */
 }
