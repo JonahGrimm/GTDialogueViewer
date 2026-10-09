@@ -61,26 +61,21 @@
 </div>
 
 <script>
-    window.initSplitter = () => {
-        const splitter = document.querySelector('.splitter');
-        const detailsPane = document.querySelector('.details-pane');
-
-        if (!splitter || !detailsPane)
-        {
-            setTimeout(window.initSplitter, 50);
-            return;
-        }
-
+    (function () {
         let isDragging = false;
-        
-        splitter.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            document.body.style.userSelect = 'none'; // Prevent text highlighting
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.classList.contains('splitter')) {
+                isDragging = true;
+                document.body.style.userSelect = 'none';
+            }
         });
 
         window.addEventListener('mousemove', (e) => {
-            console.log(e.clientX);
             if (!isDragging) return;
+            const detailsPane = document.querySelector('.details-pane');
+            if (!detailsPane) return;
+
             const newWidth = window.innerWidth - e.clientX;
             if (newWidth >= 265 && newWidth <= 800) {
                 detailsPane.style.width = newWidth + 'px';
@@ -93,7 +88,7 @@
                 document.body.style.userSelect = '';
             }
         });
-    };
+    })();
 </script>
 
 @code {
@@ -116,8 +111,6 @@
                 });
             ");
             
-            await JS.InvokeVoidAsync("initSplitter");
-
             try
             {
                 var argv = await JS.InvokeAsync<string[]>("window.__TAURI__.core.invoke", "get_startup_args");
