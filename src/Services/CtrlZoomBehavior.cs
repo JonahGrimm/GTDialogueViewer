@@ -1,8 +1,10 @@
 ﻿using Blazor.Diagrams.Core;
 using Blazor.Diagrams.Core.Behaviors;
 using Blazor.Diagrams.Core.Events;
+using Blazor.Diagrams.Core.Geometry;
 using Blazor.Diagrams.Core.Models;
 using GTDialogueViewer.Components;
+using GTDialogueViewer.Nodes;
 
 namespace GTDialogueViewer.Services;
 
@@ -54,6 +56,17 @@ public class CtrlZoomBehavior : Behavior
                     double newY = mouseWorldY + (node.Position.Y - mouseWorldY) * scaleRatio;
 
                     node.SetPosition(newX, newY);
+
+                    // If it's a comment node, also scale its dimensions uniformly
+                    if (node is GTCommentNodeModel commentNode)
+                    {
+                        // Scale width and height correctly by the ratio
+                        double newWidth = commentNode.NodeSize.X * scaleRatio;
+                        double newHeight = commentNode.NodeSize.Y * scaleRatio;
+
+                        commentNode.NodeSize = new Point(newWidth, newHeight);
+                        commentNode.Refresh();
+                    }
                 }
             });
 
