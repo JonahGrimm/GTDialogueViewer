@@ -139,3 +139,7 @@
     /* Your body container remains the static anchor point for the ports */
     position: relative;
 }
+
+.bottom-left-icon {
+    max-width: 120px !important;
+}

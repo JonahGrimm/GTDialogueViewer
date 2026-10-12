@@ -122,5 +122,19 @@ public class EditorWorkspaceService
         }
     }
 
+    public async Task OpenIconsPrompt()
+    {
+        var path = await _js.InvokeAsync<string?>("window.__TAURI__.core.invoke", "open_file_dialog_icons");
+    
+        if (!string.IsNullOrEmpty(path))
+        {
+            await _js.InvokeVoidAsync("window.__TAURI__.core.invoke", "save_speaker_path", new { path });
+            var jsonContent = await _js.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
+            SettingsData.SetSpeakerIconsFilePath(path, jsonContent);
+        }
+        
+        NotifyStateChanged();
+    }
+
     private void NotifyStateChanged() => OnChange?.Invoke();
 }

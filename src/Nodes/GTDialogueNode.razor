@@ -39,6 +39,12 @@
                 }
             </div>
         </div>
+        
+        <!-- The anchored image - Using a new 'bottom-left-icon' class -->
+        @if (@Node.IconPath != "")
+        {
+            <img src="@Node.GetFullIconPath()" class="bottom-left-icon" alt="Node Icon" />
+        }
     </div>
 </div>
 

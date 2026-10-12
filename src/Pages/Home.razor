@@ -1,4 +1,23 @@
 ﻿@page "/"
+@inject IJSRuntime JS
+@using GTDialogueViewer.Services
 @using GTDialogueViewer.Pages
 
 <EditorLayout></EditorLayout>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // This gets the raw path of the .gtspeakericons file stored in settings.json
+            var path = await JS.InvokeAsync<string>("window.__TAURI__.core.invoke", "get_speaker_path");
+            var jsonContent = await JS.InvokeAsync<string>("window.__TAURI__.core.invoke", "read_file_content", new { path });
+            SettingsData.SetSpeakerIconsFilePath(path, jsonContent);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load speaker icons path: {ex.Message}");
+        }
+    }
+}

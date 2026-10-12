@@ -1,5 +1,8 @@
 ﻿using System.Drawing;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Blazor.Diagrams.Core.Models;
+using GTDialogueViewer.Services;
 using Point = Blazor.Diagrams.Core.Geometry.Point;
 
 namespace GTDialogueViewer.Nodes;
@@ -44,4 +47,36 @@ public class GTDialogueNodeModel(Point? position = null) : NodeModel(position)
         length = int.Min(length, MaxWidth);
         return length;
     }
+
+    public string GetFullIconPath()
+    {
+        try
+        {
+            if (SettingsData.IconDBData == null)
+            {
+                Console.WriteLine("no db...");
+                return string.Empty;
+            }
+
+            if (SettingsData.IconDBData?.Icons != null && SettingsData.IconDBData.Icons.TryGetValue(IconPath, out var relativeIconSubPath))
+            {
+                if (relativeIconSubPath != null)
+                {
+                    // Manually subtract the file name from the .gtspeakericons path to get its directory, then combine with the relative sub-path
+                    int lastSlashIndex = SettingsData.SpeakerIconsFilePath.LastIndexOfAny(new[] { '\\', '/' });
+                    if (lastSlashIndex < 0) return string.Empty;
+                    var iconsDirectory = SettingsData.SpeakerIconsFilePath.Substring(0, lastSlashIndex);
+                    string prefix = "http://asset.localhost";
+                    return Path.Combine(prefix, iconsDirectory, relativeIconSubPath).Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error resolving full icon path: {ex.Message}");
+        }
+
+        return string.Empty;
+    }
 }
+
