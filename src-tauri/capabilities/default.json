@@ -12,6 +12,8 @@
 	"core:window:allow-start-dragging",
 	"fs:default",
     "fs:allow-appdata-read",
-    "fs:allow-appdata-write"
+    "fs:allow-appdata-write",
+	"dialog:default",
+    "dialog:allow-open"
   ]
 }
